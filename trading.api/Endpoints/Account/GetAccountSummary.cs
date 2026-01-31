@@ -14,7 +14,7 @@ public static class GetAccountSummary
             .WithName(Name)
             .Produces<AccountResponse>(statusCode: StatusCodes.Status200OK)
             .Produces(statusCode: StatusCodes.Status404NotFound);
-        
+
         return endpoints;
     }
 
@@ -22,12 +22,12 @@ public static class GetAccountSummary
         CancellationToken cancellationToken)
     {
         var query = new GetAccountSummaryQuery();
-        
+
         var result = await handler.Handle(query, cancellationToken);
-        
-        if(result.IsError)
-            Results.NotFound(result.Error);
-        
+
+        if (result.IsError)
+            return Results.NotFound(result.Error);
+
         return Results.Ok(result.Value);
     }
 

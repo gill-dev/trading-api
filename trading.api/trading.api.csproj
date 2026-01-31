@@ -21,6 +21,7 @@
     <ItemGroup>
       <ProjectReference Include="..\trading.application\trading.application.csproj" />
       <ProjectReference Include="..\Trading.Contracts\Trading.Contracts.csproj" />
+      <ProjectReference Include="..\trading.infrastructure\trading.infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,16 +1,16 @@
 ﻿using trading.application.Abstractions;
 using trading.application.Features.Account.GetAccountSummary;
 using Trading.Contracts.Requests;
+using trading.domain.Models;
 using trading.infrastructure.Http;
-using trading.infrastructure.Mappings;
 
 namespace trading.infrastructure.Services;
 
 public sealed class OandaApiService : IOandaApiService
 {
-    private readonly ApiClientBase  _apiClient;
+    private readonly ApiClientBase _apiClient;
     private readonly string _accountId;
-    
+
     private const string DefaultGranularity = "H1";
     private const string DefaultPrice = "MBA";
 
@@ -19,42 +19,40 @@ public sealed class OandaApiService : IOandaApiService
         _apiClient = apiClient;
         _accountId = accountId;
     }
-    
+
     public async Task<AccountResponse?> GetAccountSummaryAsync(CancellationToken cancellationToken = default)
     {
         var endpoint = $"accounts/{_accountId}/summary";
-        return await _apiClient.GetAsync<AccountResponse>(endpoint, cancellationToken);
+        return await _apiClient.GetAsync<AccountResponse>(endpoint, "account", cancellationToken);
     }
-    public async Task<CandleResponse[]> GetCandlesAsync(string instrument, string? granularity = null, int count = 500, CancellationToken cancellationToken = default)
+    public async Task<CandleResponse?> GetCandlesAsync(string instrument, string? granularity = null, int count = 500, CancellationToken cancellationToken = default)
     {
         var endpoint = BuildCandlesEndpoint(instrument, granularity ?? DefaultGranularity, count);
-        var response = await _apiClient.GetAsync<CandleResponse>(endpoint, cancellationToken);
-        
-        return response?.Candles.ToCandles() ?? [];
+        return await _apiClient.GetAsync<CandleResponse>(endpoint, "candles", cancellationToken);
+
     }
 
-    public async Task<InstrumentResponse[]> GetInstrumentsAsync(string? instruments = null, CancellationToken cancellationToken = default)
+    public async Task<InstrumentResponse[]?> GetInstrumentsAsync(string? instruments = null, CancellationToken cancellationToken = default)
     {
         var endpoint = $"accounts/{_accountId}/instruments";
-        
+
         if (!string.IsNullOrEmpty(instruments))
             endpoint += $"?instruments={instruments}";
 
-        var response = await _apiClient.GetAsync<InstrumentResponse[]>(endpoint, "instruments", cancellationToken);
-        
-        return response?.MapToInstruments() ?? [];
+        return await _apiClient.GetAsync<InstrumentResponse[]>(endpoint, "instruments", cancellationToken);
+
     }
 
     public async Task<TradeResponse[]> GetOpenTradesAsync(CancellationToken cancellationToken = default)
     {
         var endpoint = $"accounts/{_accountId}/openTrades";
-        return await _apiClient.GetAsync<TradeResponse[]>(endpoint, "trades", cancellationToken) ?? [];
+        return await _apiClient.GetAsync<TradeResponse[]>(endpoint, "trades",cancellationToken) ?? [];
     }
 
     public async Task<TradeResponse?> GetTradeAsync(string tradeId, CancellationToken cancellationToken = default)
     {
         var endpoint = $"accounts/{_accountId}/trades/{tradeId}";
-        return await _apiClient.GetAsync<TradeResponse>(endpoint, "trade", cancellationToken);
+        return await _apiClient.GetAsync<TradeResponse>(endpoint, "trade",cancellationToken);
     }
 
     public async Task<OrderFilledResponse?> PlaceTradeAsync(Order order, CancellationToken cancellationToken = default)

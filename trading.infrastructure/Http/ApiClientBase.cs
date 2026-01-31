@@ -2,7 +2,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
-using trading.application.Abstractions;
 
 namespace trading.infrastructure.Http;
 
@@ -17,13 +16,13 @@ public sealed class ApiClientBase
         _logger = logger;
     }
 
-    public async Task<T?> GetAsync<T>(string endpoint, CancellationToken cancellationToken = default)
-        where T : class
+    public async Task<T?> GetAsync<T>(string endpoint, string dataKey, CancellationToken cancellationToken = default)
+     where T : class
     {
         try
         {
             using var response = await _httpClient.GetAsync(endpoint, cancellationToken);
-            return await HandleResponseAsync<T>(response, cancellationToken);
+            return await HandleResponseAsync<T>(response, dataKey, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -32,30 +31,13 @@ public sealed class ApiClientBase
         }
     }
 
-    public async Task<T?> PostAsync<T>(string endpoint, object? body, CancellationToken cancellationToken = default)
+    public async Task<T?> PutAsync<T>(string endpoint, object? body = null, string? dataKey = null, CancellationToken cancellationToken = default)
         where T : class
     {
         try
         {
-            using var response = await _httpClient.PostAsJsonAsync(endpoint, body, WriteOptions, cancellationToken);
-            return await HandleResponseAsync<T>(response, cancellationToken);
-
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Post Request failed: {Endpoint}", endpoint);
-            return default;
-        }
-    }
-
-    public async Task<T?> PutAsync<T>(string endpoint, object? body, CancellationToken cancellationToken = default)
-    where T : class
-    {
-        try
-        {
             using var response = await _httpClient.PutAsJsonAsync(endpoint, body, WriteOptions, cancellationToken);
-            return await HandleResponseAsync<T>(response, cancellationToken);
-
+            return await HandleResponseAsync<T>(response, dataKey, cancellationToken);
         }
         catch (Exception e)
         {
@@ -64,19 +46,38 @@ public sealed class ApiClientBase
         }
     }
 
+    public async Task<T?> PostAsync<T>(string endpoint, object? body, string? dataKey = null, CancellationToken cancellationToken = default)
+        where T : class
+    {
+        try
+        {
+            using var response = await _httpClient.PostAsJsonAsync(endpoint, body, WriteOptions, cancellationToken);
+            return await HandleResponseAsync<T>(response, dataKey, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Post Request failed: {Endpoint}", endpoint);
+            return default;
+        }
+    }
 
-    private async Task<T?> HandleResponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken = default)
+    private async Task<T?> HandleResponseAsync<T>(HttpResponseMessage response, string? dataKey = null, CancellationToken cancellationToken = default)
     {
         if (!response.IsSuccessStatusCode)
         {
             var error = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogWarning("Request failed with {error}", error);
-            return default; 
+            _logger.LogWarning("Request failed with {StatusCode}: {Error}", response.StatusCode, error);
+            return default;
         }
-        
-        return await response.Content.ReadFromJsonAsync<T>(cancellationToken);
-    }
 
+        if (string.IsNullOrEmpty(dataKey))
+            return await response.Content.ReadFromJsonAsync<T>(ReadOptions, cancellationToken);
+
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken);
+        return json.TryGetProperty(dataKey, out var element)
+            ? element.Deserialize<T>(ReadOptions)
+            : default;
+    }
     private static readonly JsonSerializerOptions ReadOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

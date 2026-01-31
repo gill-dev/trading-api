@@ -5,7 +5,7 @@ using trading.domain;
 
 namespace trading.application.Features.Account.GetAccountSummary;
 
-internal sealed class GetAccountSummaryHandler: IQueryHandler<GetAccountSummaryQuery, AccountResponse>
+internal sealed class GetAccountSummaryHandler : IQueryHandler<GetAccountSummaryQuery, AccountResponse>
 {
     private readonly IOandaApiService _oandaApiService;
 
@@ -15,7 +15,7 @@ internal sealed class GetAccountSummaryHandler: IQueryHandler<GetAccountSummaryQ
     }
 
     public async Task<Result<AccountResponse>> Handle(
-        GetAccountSummaryQuery query, 
+        GetAccountSummaryQuery query,
         CancellationToken cancellationToken = default)
     {
         var response = await _oandaApiService.GetAccountSummaryAsync(cancellationToken);

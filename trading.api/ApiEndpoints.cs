@@ -7,7 +7,7 @@ public static class ApiEndpoints
     public static class Trades
     {
         private const string Base = $"{Api}/trades";
-        
+
         public const string GetTrades = $"{Base}/trades";
     }
 

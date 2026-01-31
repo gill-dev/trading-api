@@ -6,5 +6,5 @@ namespace trading.application.Abstractions;
 public interface IOandaApiService
 {
     Task<AccountResponse?> GetAccountSummaryAsync(CancellationToken cancellationToken = default);
-    
+
 }
