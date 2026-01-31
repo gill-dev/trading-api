@@ -1,0 +1,7 @@
+﻿services:
+  trading.api:
+    image: trading.api
+    build:
+      context: .
+      dockerfile: trading.api/Dockerfile
+
