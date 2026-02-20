@@ -89,7 +89,8 @@ public sealed class ApiClientBase
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        NumberHandling = JsonNumberHandling.WriteAsString
+        NumberHandling = JsonNumberHandling.WriteAsString,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
 }

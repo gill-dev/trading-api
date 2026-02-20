@@ -1,8 +1,11 @@
-﻿namespace Trading.Contracts.Enums;
+﻿using System.Text.Json.Serialization;
 
+namespace Trading.Contracts.Enums;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum GuaranteedStopLossOrderMode
 {
-    Allowed,
-    Disabled,
-    Required
+    ALLOWED,
+    DISABLED,
+    REQUIRED
 }

@@ -18,7 +18,7 @@ public static class GetAccountSummary
         return endpoints;
     }
 
-    public static async Task<IResult> HandleAsync(IQueryHandler<GetAccountSummaryQuery, AccountResponse> handler,
+    private static async Task<IResult> HandleAsync(IQueryHandler<GetAccountSummaryQuery, AccountResponse> handler,
         CancellationToken cancellationToken)
     {
         var query = new GetAccountSummaryQuery();

@@ -1,4 +1,8 @@
+using trading.api.Endpoints;
 using trading.api.Endpoints.Account;
+using trading.api.Endpoints.Instruments;
+using trading.api.Endpoints.Orders;
+using trading.api.Endpoints.Trades;
 using trading.api.Middleware;
 using trading.application;
 using trading.infrastructure;
@@ -9,6 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services
     .AddApplication()
@@ -25,9 +39,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
-app.MapGetAccountSummary();
+app.MapEndpoints();
 
-//other middleware
 app.Run();

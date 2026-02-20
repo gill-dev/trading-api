@@ -1,5 +1,4 @@
 ﻿using trading.application.Abstractions;
-using trading.application.Features.Account.GetAccountSummary;
 using Trading.Contracts.Requests;
 using trading.domain.Models;
 using trading.infrastructure.Http;
@@ -22,7 +21,7 @@ public sealed class OandaApiService : IOandaApiService
 
     public async Task<AccountResponse?> GetAccountSummaryAsync(CancellationToken cancellationToken = default)
     {
-        var endpoint = $"accounts/{_accountId}/summary";
+        var endpoint = $"accounts/{_accountId}";
         return await _apiClient.GetAsync<AccountResponse>(endpoint, "account", cancellationToken);
     }
     public async Task<CandleResponse?> GetCandlesAsync(string instrument, string? granularity = null, int count = 500, CancellationToken cancellationToken = default)
@@ -71,6 +70,6 @@ public sealed class OandaApiService : IOandaApiService
 
     private static string BuildCandlesEndpoint(string instrument, string granularity, int count)
     {
-        return $"instruments/{instrument}/candles?granularity={granularity}&price={DefaultPrice}&count={count}";
+        return $"instruments/{instrument}/candles?&count={count}&price={DefaultPrice}&granularity={granularity}";
     }
 }
